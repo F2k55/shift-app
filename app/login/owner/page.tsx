@@ -29,7 +29,7 @@ export default function OwnerLogin() {
 
   return (
     <div className="min-h-screen bg-blue-50 flex flex-col items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow p-8 w-full max-w-xs">
+      <div className="bg-white rounded-2xl shadow p-8 w-full max-w-md">
         <h1 className="text-2xl font-bold mb-1">🏪 店舗側ログイン</h1>
         <p className="text-gray-400 text-sm mb-6">店長・オーナーの方はこちら</p>
 
