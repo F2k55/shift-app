@@ -208,40 +208,40 @@ export default function ManageShifts() {
 
   return (
     <div className="min-h-screen bg-blue-50">
-      <div className="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button onClick={() => router.push('/manage/dashboard')} className="text-gray-400">←</button>
-          <h1 className="text-xl font-bold">📅 シフト管理</h1>
+      <div className="bg-white shadow-sm px-8 py-5 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <button onClick={() => router.push('/manage/dashboard')} className="text-gray-400 text-xl">←</button>
+          <h1 className="text-2xl font-bold">📅 シフト管理</h1>
         </div>
         <button
           onClick={handleAutoAssign}
           disabled={autoLoading}
-          className="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-semibold disabled:opacity-50"
+          className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold disabled:opacity-50"
         >
           {autoSaved ? '✅ 振り分け完了！' : autoLoading ? '振り分け中...' : '🤖 自動振り分け'}
         </button>
       </div>
 
-      <div className="p-6 max-w-6xl mx-auto">
-        <div className="grid grid-cols-2 gap-6">
+      <div className="p-8 w-full">
+        <div className="grid grid-cols-2 gap-8">
 
           {/* 左：カレンダー */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
-              <button onClick={() => setCurrentMonth(new Date(year, month - 1, 1))} className="text-gray-400 px-3 py-1">←</button>
-              <p className="font-bold">{year}年{month + 1}月</p>
-              <button onClick={() => setCurrentMonth(new Date(year, month + 1, 1))} className="text-gray-400 px-3 py-1">→</button>
+              <button onClick={() => setCurrentMonth(new Date(year, month - 1, 1))} className="text-gray-400 px-4 py-2 text-xl">←</button>
+              <p className="text-xl font-bold">{year}年{month + 1}月</p>
+              <button onClick={() => setCurrentMonth(new Date(year, month + 1, 1))} className="text-gray-400 px-4 py-2 text-xl">→</button>
             </div>
 
-            <div className="bg-white rounded-2xl shadow p-4">
-              <div className="grid grid-cols-7 mb-2">
+            <div className="bg-white rounded-2xl shadow p-6">
+              <div className="grid grid-cols-7 mb-3">
                 {DAYS.map((day, i) => (
-                  <div key={i} className={`text-center text-xs font-medium py-1 ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-gray-500'}`}>
+                  <div key={i} className={`text-center font-medium py-2 ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-gray-500'}`}>
                     {day}
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-7 gap-1">
+              <div className="grid grid-cols-7 gap-2">
                 {Array.from({ length: firstDay }).map((_, i) => <div key={i} />)}
                 {Array.from({ length: daysInMonth }).map((_, i) => {
                   const day = i + 1
@@ -255,7 +255,7 @@ export default function ManageShifts() {
                     <button
                       key={day}
                       onClick={() => setSelectedDate(dateStr)}
-                      className={`aspect-square rounded-xl text-sm flex flex-col items-center justify-center
+                      className={`aspect-square rounded-xl flex flex-col items-center justify-center
                         ${isSelected ? 'bg-blue-600 text-white' : 'hover:bg-blue-50'}
                         ${!isSelected && dayOfWeek === 0 ? 'text-red-400' : ''}
                         ${!isSelected && dayOfWeek === 6 ? 'text-blue-400' : ''}
@@ -278,58 +278,58 @@ export default function ManageShifts() {
               </div>
             </div>
 
-            <div className="flex gap-3 text-xs text-gray-400">
+            <div className="flex gap-4 text-sm text-gray-400">
               <span>🔵 希望あり</span>
               <span>🟢 確定済み</span>
             </div>
           </div>
 
           {/* 右：選択した日の詳細 */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-6">
             {selectedDate ? (
               <>
-                <div className="bg-white rounded-2xl shadow p-5">
-                  <h2 className="text-sm font-medium text-gray-500 mb-3">
+                <div className="bg-white rounded-2xl shadow p-6">
+                  <h2 className="font-medium text-gray-500 mb-4">
                     {new Date(selectedDate + 'T00:00:00').toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short' })}の確定シフト
                   </h2>
                   {selectedDateShifts.length === 0 ? (
-                    <p className="text-sm text-gray-400 text-center py-4">まだ確定シフトがありません</p>
+                    <p className="text-gray-400 text-center py-6">まだ確定シフトがありません</p>
                   ) : (
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-3">
                       {selectedDateShifts.map((shift: any) => (
-                        <div key={shift.id} className="bg-green-50 rounded-xl p-3">
+                        <div key={shift.id} className="bg-green-50 rounded-xl p-4">
                           <div className="flex items-center justify-between">
-                            <p className="font-semibold text-sm">{getStaffName(shift.staff_id)}</p>
-                            <span className="text-xs text-green-600 font-semibold">✅ 確定</span>
+                            <p className="font-semibold">{getStaffName(shift.staff_id)}</p>
+                            <span className="text-green-600 font-semibold">✅ 確定</span>
                           </div>
-                          <p className="text-xs text-gray-500">{shift.start_time?.slice(0, 5)} 〜 {shift.end_time?.slice(0, 5)}</p>
-                          {shift.role_id && <p className="text-xs text-gray-400 mt-1">{getRoleName(shift.role_id)}</p>}
+                          <p className="text-gray-500 text-sm mt-1">{shift.start_time?.slice(0, 5)} 〜 {shift.end_time?.slice(0, 5)}</p>
+                          {shift.role_id && <p className="text-gray-400 text-sm mt-1">{getRoleName(shift.role_id)}</p>}
                         </div>
                       ))}
                     </div>
                   )}
                   <button
                     onClick={handleRequestStaff}
-                    className="w-full mt-3 border border-orange-300 text-orange-500 py-2 rounded-xl text-sm font-semibold"
+                    className="w-full mt-4 border border-orange-300 text-orange-500 py-3 rounded-xl font-semibold"
                   >
                     {notifSent ? '✅ 送信しました！' : '⚠️ 人員不足を通知する'}
                   </button>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow p-5">
-                  <h2 className="text-sm font-medium text-gray-500 mb-3">シフト希望</h2>
+                <div className="bg-white rounded-2xl shadow p-6">
+                  <h2 className="font-medium text-gray-500 mb-4">シフト希望</h2>
                   {selectedDateRequests.length === 0 ? (
-                    <p className="text-sm text-gray-400 text-center py-4">希望がありません</p>
+                    <p className="text-gray-400 text-center py-6">希望がありません</p>
                   ) : (
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-3">
                       {selectedDateRequests.map((req: any) => (
-                        <div key={req.id} className="bg-blue-50 rounded-xl p-3">
+                        <div key={req.id} className="bg-blue-50 rounded-xl p-4">
                           <div className="flex items-center justify-between mb-1">
-                            <p className="font-semibold text-sm">{getStaffName(req.staff_id)}</p>
-                            <span className="text-xs text-blue-600">{getPriorityLabel(req.priority)}</span>
+                            <p className="font-semibold">{getStaffName(req.staff_id)}</p>
+                            <span className="text-blue-600">{getPriorityLabel(req.priority)}</span>
                           </div>
-                          <p className="text-xs text-gray-500">{req.start_time?.slice(0, 5)} 〜 {req.end_time?.slice(0, 5)}</p>
-                          {req.role_id && <p className="text-xs text-gray-400 mt-1">{getRoleName(req.role_id)}</p>}
+                          <p className="text-gray-500 text-sm">{req.start_time?.slice(0, 5)} 〜 {req.end_time?.slice(0, 5)}</p>
+                          {req.role_id && <p className="text-gray-400 text-sm mt-1">{getRoleName(req.role_id)}</p>}
                         </div>
                       ))}
                     </div>
@@ -337,7 +337,7 @@ export default function ManageShifts() {
                 </div>
               </>
             ) : (
-              <div className="bg-white rounded-2xl shadow p-5 flex items-center justify-center text-gray-400 text-sm h-40">
+              <div className="bg-white rounded-2xl shadow p-6 flex items-center justify-center text-gray-400 h-48">
                 カレンダーから日付を選択してください
               </div>
             )}
