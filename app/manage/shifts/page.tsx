@@ -231,7 +231,7 @@ export default function ManageShifts() {
                     <button
                       key={day}
                       onClick={() => setSelectedDate(dateStr)}
-                      className={`aspect-square rounded-xl flex flex-col items-center justify-center
+                      className={`aspect-square rounded-lg text-xs flex flex-col items-center justify-center
                         ${isSelected ? 'bg-blue-600 text-white' : 'hover:bg-blue-50'}
                         ${!isSelected && dayOfWeek === 0 ? 'text-red-400' : ''}
                         ${!isSelected && dayOfWeek === 6 ? 'text-blue-400' : ''}
