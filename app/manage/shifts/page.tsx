@@ -217,7 +217,7 @@ export default function ManageShifts() {
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-7 gap-1">
+              <div className="grid grid-cols-7 gap-0">
                 {Array.from({ length: firstDay }).map((_, i) => <div key={i} />)}
                 {Array.from({ length: daysInMonth }).map((_, i) => {
                   const day = i + 1
@@ -237,7 +237,7 @@ export default function ManageShifts() {
                         ${!isSelected && dayOfWeek === 6 ? 'text-blue-400' : ''}
                       `}
                     >
-                      <span className="text-sm">{day}</span>
+                      <span className="text-xs">{day}</span>
                       {dayShifts.length > 0 && (
                         <span className={`text-xs ${isSelected ? 'text-white' : 'text-green-500'}`}>{dayShifts.length}</span>
                       )}
