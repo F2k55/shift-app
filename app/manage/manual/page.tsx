@@ -169,39 +169,37 @@ export default function ManageManual() {
 
   return (
     <div className="min-h-screen bg-blue-50">
-      <div className="bg-white shadow-sm px-6 py-4 flex items-center gap-3">
-        <button onClick={() => router.push('/manage/dashboard')} className="text-gray-400">
-          &larr;
-        </button>
-        <h1 className="text-xl font-bold">📚マニュアル管理</h1>
+      <div className="bg-white shadow-sm px-8 py-5 flex items-center gap-4">
+        <button onClick={() => router.push('/manage/dashboard')} className="text-gray-400 text-xl">←</button>
+        <h1 className="text-2xl font-bold">📚 マニュアル管理</h1>
       </div>
 
-      <div className="p-6 max-w-4xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="p-8 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-          <div className="flex flex-col gap-4">
-            <div className="bg-white rounded-2xl shadow p-5">
-              <h2 className="text-sm font-medium text-gray-500 mb-3">マニュアル一覧</h2>
+          <div className="flex flex-col gap-6">
+            <div className="bg-white rounded-2xl shadow p-6">
+              <h2 className="font-medium text-gray-500 mb-4">マニュアル一覧</h2>
 
               {categories.length === 0 && (
-                <p className="text-sm text-gray-400 text-center py-6">まだカテゴリがありません</p>
+                <p className="text-gray-400 text-center py-8">まだカテゴリがありません</p>
               )}
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-3">
                 {categories.map((cat: any) => (
                   <div key={cat.id} className="border border-gray-200 rounded-xl overflow-hidden">
                     <div
-                      className="flex items-center justify-between px-4 py-3 bg-gray-50 cursor-pointer hover:bg-blue-50"
+                      className="flex items-center justify-between px-5 py-4 bg-gray-50 cursor-pointer hover:bg-blue-50"
                       onClick={() => toggleCategory(cat.id)}
                     >
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-400 text-sm">
+                      <div className="flex items-center gap-3">
+                        <span className="text-gray-400">
                           {openCategories.includes(cat.id) ? 'v' : '>'}
                         </span>
-                        <p className="font-semibold text-sm">{cat.name}</p>
-                        <span className="text-xs text-gray-400">({getManualsForCategory(cat.id).length}件)</span>
+                        <p className="font-semibold">{cat.name}</p>
+                        <span className="text-sm text-gray-400">({getManualsForCategory(cat.id).length}件)</span>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
                         <button
                           onClick={(e) => {
                             e.stopPropagation()
@@ -211,7 +209,7 @@ export default function ManageManual() {
                             setEditMode(false)
                             setPdfFile(null)
                           }}
-                          className="text-xs text-blue-500 border border-blue-200 px-2 py-1 rounded-lg"
+                          className="text-blue-500 border border-blue-200 px-3 py-1 rounded-lg text-sm"
                         >
                           +追加
                         </button>
@@ -220,7 +218,7 @@ export default function ManageManual() {
                             e.stopPropagation()
                             handleDeleteCategory(cat.id)
                           }}
-                          className="text-xs text-red-400"
+                          className="text-red-400 text-sm"
                         >
                           削除
                         </button>
@@ -230,7 +228,7 @@ export default function ManageManual() {
                     {openCategories.includes(cat.id) && (
                       <div className="flex flex-col">
                         {getManualsForCategory(cat.id).length === 0 && (
-                          <p className="text-xs text-gray-400 px-4 py-3">まだマニュアルがありません</p>
+                          <p className="text-sm text-gray-400 px-5 py-4">まだマニュアルがありません</p>
                         )}
                         {getManualsForCategory(cat.id).map((manual: any) => (
                           <div
@@ -241,12 +239,12 @@ export default function ManageManual() {
                               setEditMode(false)
                               setPdfFile(null)
                             }}
-                            className={`flex items-center justify-between px-4 py-2 border-t border-gray-100 cursor-pointer hover:bg-blue-50 ${selectedManual?.id === manual.id ? 'bg-blue-50' : ''}`}
+                            className={`flex items-center justify-between px-5 py-3 border-t border-gray-100 cursor-pointer hover:bg-blue-50 ${selectedManual?.id === manual.id ? 'bg-blue-50' : ''}`}
                           >
                             <div className="flex items-center gap-2">
-                              <p className="text-sm">{manual.title}</p>
+                              <p>{manual.title}</p>
                               {manual.file_url && (
-                                <span className="text-xs text-red-400">PDF</span>
+                                <span className="text-sm text-red-400">PDF</span>
                               )}
                             </div>
                             <button
@@ -254,7 +252,7 @@ export default function ManageManual() {
                                 e.stopPropagation()
                                 handleDeleteManual(manual.id)
                               }}
-                              className="text-xs text-red-400"
+                              className="text-sm text-red-400"
                             >
                               削除
                             </button>
@@ -266,17 +264,17 @@ export default function ManageManual() {
                 ))}
               </div>
 
-              <div className="flex flex-col gap-2 mt-4">
+              <div className="flex flex-col gap-3 mt-6">
                 <input
                   type="text"
                   placeholder="新しいカテゴリ名"
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3"
                 />
                 <button
                   onClick={handleAddCategory}
-                  className="w-full bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-semibold"
+                  className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold"
                 >
                   追加
                 </button>
@@ -284,32 +282,32 @@ export default function ManageManual() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow p-5">
+          <div className="bg-white rounded-2xl shadow p-6">
             {showAddManual ? (
-              <div className="flex flex-col gap-3">
-                <h2 className="text-sm font-medium text-gray-500">マニュアルを追加</h2>
+              <div className="flex flex-col gap-4">
+                <h2 className="font-medium text-gray-500">マニュアルを追加</h2>
                 <div>
-                  <p className="text-xs text-gray-400 mb-1">タイトル</p>
+                  <p className="text-sm text-gray-400 mb-2">タイトル</p>
                   <input
                     type="text"
                     placeholder="例：オープン作業手順"
                     value={newManualTitle}
                     onChange={(e) => setNewManualTitle(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3"
                   />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400 mb-1">内容</p>
+                  <p className="text-sm text-gray-400 mb-2">内容</p>
                   <textarea
                     placeholder="マニュアルの内容を入力してください"
                     value={newManualContent}
                     onChange={(e) => setNewManualContent(e.target.value)}
-                    rows={6}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none"
+                    rows={8}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 resize-none"
                   />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400 mb-1">PDFファイル（任意）</p>
+                  <p className="text-sm text-gray-400 mb-2">PDFファイル（任意）</p>
                   <input
                     type="file"
                     accept=".pdf"
@@ -319,25 +317,22 @@ export default function ManageManual() {
                   />
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full border border-dashed border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-400 hover:bg-gray-50"
+                    className="w-full border border-dashed border-gray-300 rounded-lg px-4 py-3 text-gray-400 hover:bg-gray-50"
                   >
                     {pdfFile ? pdfFile.name : 'PDFをアップロード'}
                   </button>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button
-                    onClick={() => {
-                      setShowAddManual(false)
-                      setPdfFile(null)
-                    }}
-                    className="flex-1 border border-gray-300 text-gray-500 py-2 rounded-xl text-sm"
+                    onClick={() => { setShowAddManual(false); setPdfFile(null) }}
+                    className="flex-1 border border-gray-300 text-gray-500 py-3 rounded-xl"
                   >
                     キャンセル
                   </button>
                   <button
                     onClick={handleAddManual}
                     disabled={loading || uploading || !newManualTitle.trim()}
-                    className="flex-1 bg-blue-600 text-white py-2 rounded-xl text-sm font-semibold disabled:opacity-50"
+                    className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-semibold disabled:opacity-50"
                   >
                     {uploading ? 'アップロード中...' : loading ? '追加中...' : '追加する'}
                   </button>
@@ -346,28 +341,28 @@ export default function ManageManual() {
             ) : selectedManual ? (
               <div>
                 {editMode ? (
-                  <div className="flex flex-col gap-3">
-                    <h2 className="text-sm font-medium text-gray-500">編集</h2>
+                  <div className="flex flex-col gap-4">
+                    <h2 className="font-medium text-gray-500">編集</h2>
                     <div>
-                      <p className="text-xs text-gray-400 mb-1">タイトル</p>
+                      <p className="text-sm text-gray-400 mb-2">タイトル</p>
                       <input
                         type="text"
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                        className="w-full border border-gray-300 rounded-lg px-4 py-3"
                       />
                     </div>
                     <div>
-                      <p className="text-xs text-gray-400 mb-1">内容</p>
+                      <p className="text-sm text-gray-400 mb-2">内容</p>
                       <textarea
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
-                        rows={6}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none"
+                        rows={8}
+                        className="w-full border border-gray-300 rounded-lg px-4 py-3 resize-none"
                       />
                     </div>
                     <div>
-                      <p className="text-xs text-gray-400 mb-1">PDFファイル（任意）</p>
+                      <p className="text-sm text-gray-400 mb-2">PDFファイル（任意）</p>
                       <input
                         type="file"
                         accept=".pdf"
@@ -377,25 +372,22 @@ export default function ManageManual() {
                       />
                       <button
                         onClick={() => editFileInputRef.current?.click()}
-                        className="w-full border border-dashed border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-400 hover:bg-gray-50"
+                        className="w-full border border-dashed border-gray-300 rounded-lg px-4 py-3 text-gray-400 hover:bg-gray-50"
                       >
                         {pdfFile ? pdfFile.name : selectedManual.file_url ? 'PDFを変更する' : 'PDFをアップロード'}
                       </button>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-3">
                       <button
-                        onClick={() => {
-                          setEditMode(false)
-                          setPdfFile(null)
-                        }}
-                        className="flex-1 border border-gray-300 text-gray-500 py-2 rounded-xl text-sm"
+                        onClick={() => { setEditMode(false); setPdfFile(null) }}
+                        className="flex-1 border border-gray-300 text-gray-500 py-3 rounded-xl"
                       >
                         キャンセル
                       </button>
                       <button
                         onClick={handleEditManual}
                         disabled={loading || uploading}
-                        className="flex-1 bg-blue-600 text-white py-2 rounded-xl text-sm font-semibold disabled:opacity-50"
+                        className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-semibold disabled:opacity-50"
                       >
                         {uploading ? 'アップロード中...' : saved ? '保存しました！' : loading ? '保存中...' : '保存する'}
                       </button>
@@ -403,23 +395,23 @@ export default function ManageManual() {
                   </div>
                 ) : (
                   <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <h2 className="text-sm font-medium text-gray-500">マニュアル詳細</h2>
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="font-medium text-gray-500">マニュアル詳細</h2>
                       <button
                         onClick={() => {
                           setEditMode(true)
                           setEditTitle(selectedManual.title)
                           setEditContent(selectedManual.content || '')
                         }}
-                        className="text-xs text-blue-500 border border-blue-200 px-2 py-1 rounded-lg"
+                        className="text-blue-500 border border-blue-200 px-3 py-1 rounded-lg"
                       >
                         編集
                       </button>
                     </div>
-                    <p className="text-lg font-bold mb-3">{selectedManual.title}</p>
+                    <p className="text-xl font-bold mb-4">{selectedManual.title}</p>
                     {selectedManual.content && (
-                      <div className="bg-gray-50 rounded-xl p-4 mb-3">
-                        <p className="text-sm text-gray-700 whitespace-pre-wrap">{selectedManual.content}</p>
+                      <div className="bg-gray-50 rounded-xl p-5 mb-4">
+                        <p className="text-gray-700 whitespace-pre-wrap">{selectedManual.content}</p>
                       </div>
                     )}
                     {selectedManual.file_url && (
@@ -427,16 +419,16 @@ export default function ManageManual() {
                         href={selectedManual.file_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600 font-semibold"
+                        className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-5 py-4 text-red-600 font-semibold"
                       >
-                        📄PDFを開く
+                        📄 PDFを開く
                       </a>
                     )}
                   </div>
                 )}
               </div>
             ) : (
-              <div className="flex items-center justify-center h-full text-gray-400 text-sm text-center">
+              <div className="flex items-center justify-center h-full text-gray-400 text-center">
                 左からマニュアルを選択するか<br />カテゴリの+追加を押してください
               </div>
             )}
