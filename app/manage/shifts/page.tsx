@@ -198,26 +198,26 @@ export default function ManageShifts() {
         </button>
       </div>
 
-      <div className="p-6 h-[calc(100vh-72px)] overflow-hidden">
-        <div className="grid grid-cols-2 gap-6 h-full">
+      <div className="p-6">
+        <div className="grid grid-cols-2 gap-6">
 
           {/* 左：カレンダー */}
-          <div className="flex flex-col gap-4 overflow-hidden text-sm scale-90 origin-top-left w-[111%]">
+          <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <button onClick={() => setCurrentMonth(new Date(year, month - 1, 1))} className="text-gray-400 px-3 py-1 text-xl">←</button>
               <p className="text-lg font-bold">{year}年{month + 1}月</p>
               <button onClick={() => setCurrentMonth(new Date(year, month + 1, 1))} className="text-gray-400 px-3 py-1 text-xl">→</button>
             </div>
 
-            <div className="bg-white rounded-2xl shadow p-4 flex-1">
+            <div className="bg-white rounded-2xl shadow p-4">
               <div className="grid grid-cols-7 mb-2">
                 {DAYS.map((day, i) => (
-                  <div key={i} className={`text-center font-medium py-1 ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-gray-500'}`}>
+                  <div key={i} className={`text-center font-medium py-1 text-sm ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-gray-500'}`}>
                     {day}
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-7 gap-0">
+              <div className="grid grid-cols-7 gap-1">
                 {Array.from({ length: firstDay }).map((_, i) => <div key={i} />)}
                 {Array.from({ length: daysInMonth }).map((_, i) => {
                   const day = i + 1
@@ -231,13 +231,13 @@ export default function ManageShifts() {
                     <button
                       key={day}
                       onClick={() => setSelectedDate(dateStr)}
-                      className={`aspect-square rounded-lg text-xs flex flex-col items-center justify-center
+                      className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm
                         ${isSelected ? 'bg-blue-600 text-white' : 'hover:bg-blue-50'}
                         ${!isSelected && dayOfWeek === 0 ? 'text-red-400' : ''}
                         ${!isSelected && dayOfWeek === 6 ? 'text-blue-400' : ''}
                       `}
                     >
-                      <span className="text-xs">{day}</span>
+                      <span>{day}</span>
                       {dayShifts.length > 0 && (
                         <span className={`text-xs ${isSelected ? 'text-white' : 'text-green-500'}`}>{dayShifts.length}</span>
                       )}
@@ -257,7 +257,7 @@ export default function ManageShifts() {
           </div>
 
           {/* 右：選択した日の詳細 */}
-          <div className="flex flex-col gap-4 overflow-y-auto">
+          <div className="flex flex-col gap-4">
             {selectedDate ? (
               <>
                 <div className="bg-white rounded-2xl shadow p-5">
