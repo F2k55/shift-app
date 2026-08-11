@@ -202,7 +202,7 @@ export default function ManageShifts() {
         <div className="grid grid-cols-2 gap-6 h-full">
 
           {/* 左：カレンダー */}
-          <div className="flex flex-col gap-4 overflow-hidden">
+          <div className="flex flex-col gap-4 overflow-hidden text-sm scale-90 origin-top-left w-[111%]">
             <div className="flex items-center justify-between">
               <button onClick={() => setCurrentMonth(new Date(year, month - 1, 1))} className="text-gray-400 px-3 py-1 text-xl">←</button>
               <p className="text-lg font-bold">{year}年{month + 1}月</p>
