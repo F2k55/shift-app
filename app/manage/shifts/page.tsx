@@ -113,18 +113,13 @@ export default function ManageShifts() {
       const sortedRequests = [...wantRequests, ...possibleRequests]
 
       const assignedSkillLevels: string[] = []
-
       sortedRequests.sort((a, b) => (staffWorkCount[a.staff_id] || 0) - (staffWorkCount[b.staff_id] || 0))
 
       for (const req of sortedRequests) {
-        const staffRole = staffRoles.find(
-          r => r.staff_id === req.staff_id && r.role_id === req.role_id
-        )
+        const staffRole = staffRoles.find(r => r.staff_id === req.staff_id && r.role_id === req.role_id)
         const skillLevel = staffRole?.skill_level || '中級'
 
-        if (skillLevel === '初級' && assignedSkillLevels.includes('初級')) {
-          continue
-        }
+        if (skillLevel === '初級' && assignedSkillLevels.includes('初級')) continue
 
         newShifts.push({
           store_id: storeId,
@@ -153,17 +148,13 @@ export default function ManageShifts() {
 
   const handleRequestStaff = async () => {
     const supabase = createClient()
-
-    await supabase
-      .from('notifications')
-      .insert({
-        store_id: storeId,
-        staff_id: null,
-        type: 'from_owner',
-        message: `${new Date(selectedDate + 'T00:00:00').toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short' })}の人員が不足しています。入れる方はご連絡ください。`,
-        is_read: false,
-      })
-
+    await supabase.from('notifications').insert({
+      store_id: storeId,
+      staff_id: null,
+      type: 'from_owner',
+      message: `${new Date(selectedDate + 'T00:00:00').toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short' })}の人員が不足しています。入れる方はご連絡ください。`,
+      is_read: false,
+    })
     setNotifSent(true)
     setTimeout(() => setNotifSent(false), 3000)
   }
@@ -180,26 +171,11 @@ export default function ManageShifts() {
     return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
   }
 
-  const getRequestsForDate = (dateStr: string) => {
-    return requests.filter(r => r.date === dateStr)
-  }
-
-  const getShiftsForDate = (dateStr: string) => {
-    return shifts.filter(s => s.date === dateStr)
-  }
-
-  const getPriorityLabel = (priority: string) => {
-    if (priority === 'want') return '🙋 希望'
-    return '🙂 可能'
-  }
-
-  const getStaffName = (staffId: string) => {
-    return staff.find(s => s.id === staffId)?.name || '不明'
-  }
-
-  const getRoleName = (roleId: string) => {
-    return roles.find(r => r.id === roleId)?.name || ''
-  }
+  const getRequestsForDate = (dateStr: string) => requests.filter(r => r.date === dateStr)
+  const getShiftsForDate = (dateStr: string) => shifts.filter(s => s.date === dateStr)
+  const getPriorityLabel = (priority: string) => priority === 'want' ? '🙋 希望' : '🙂 可能'
+  const getStaffName = (staffId: string) => staff.find(s => s.id === staffId)?.name || '不明'
+  const getRoleName = (roleId: string) => roles.find(r => r.id === roleId)?.name || ''
 
   const { firstDay, daysInMonth, year, month } = getDaysInMonth()
   const DAYS = ['日', '月', '火', '水', '木', '金', '土']
@@ -208,7 +184,7 @@ export default function ManageShifts() {
 
   return (
     <div className="min-h-screen bg-blue-50">
-      <div className="bg-white shadow-sm px-8 py-5 flex items-center justify-between">
+      <div className="bg-white shadow-sm px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button onClick={() => router.push('/manage/dashboard')} className="text-gray-400 text-xl">←</button>
           <h1 className="text-2xl font-bold">📅 シフト管理</h1>
@@ -222,26 +198,26 @@ export default function ManageShifts() {
         </button>
       </div>
 
-      <div className="p-8 w-full">
-        <div className="grid grid-cols-2 gap-8">
+      <div className="p-6 h-[calc(100vh-72px)] overflow-hidden">
+        <div className="grid grid-cols-2 gap-6 h-full">
 
           {/* 左：カレンダー */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4 overflow-hidden">
             <div className="flex items-center justify-between">
-              <button onClick={() => setCurrentMonth(new Date(year, month - 1, 1))} className="text-gray-400 px-4 py-2 text-xl">←</button>
-              <p className="text-xl font-bold">{year}年{month + 1}月</p>
-              <button onClick={() => setCurrentMonth(new Date(year, month + 1, 1))} className="text-gray-400 px-4 py-2 text-xl">→</button>
+              <button onClick={() => setCurrentMonth(new Date(year, month - 1, 1))} className="text-gray-400 px-3 py-1 text-xl">←</button>
+              <p className="text-lg font-bold">{year}年{month + 1}月</p>
+              <button onClick={() => setCurrentMonth(new Date(year, month + 1, 1))} className="text-gray-400 px-3 py-1 text-xl">→</button>
             </div>
 
-            <div className="bg-white rounded-2xl shadow p-6">
-              <div className="grid grid-cols-7 mb-3">
+            <div className="bg-white rounded-2xl shadow p-4 flex-1">
+              <div className="grid grid-cols-7 mb-2">
                 {DAYS.map((day, i) => (
-                  <div key={i} className={`text-center font-medium py-2 ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-gray-500'}`}>
+                  <div key={i} className={`text-center font-medium py-1 ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-gray-500'}`}>
                     {day}
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-7 gap-2">
+              <div className="grid grid-cols-7 gap-1">
                 {Array.from({ length: firstDay }).map((_, i) => <div key={i} />)}
                 {Array.from({ length: daysInMonth }).map((_, i) => {
                   const day = i + 1
@@ -261,16 +237,12 @@ export default function ManageShifts() {
                         ${!isSelected && dayOfWeek === 6 ? 'text-blue-400' : ''}
                       `}
                     >
-                      <span>{day}</span>
+                      <span className="text-sm">{day}</span>
                       {dayShifts.length > 0 && (
-                        <span className={`text-xs ${isSelected ? 'text-white' : 'text-green-500'}`}>
-                          {dayShifts.length}
-                        </span>
+                        <span className={`text-xs ${isSelected ? 'text-white' : 'text-green-500'}`}>{dayShifts.length}</span>
                       )}
                       {dayShifts.length === 0 && dayRequests.length > 0 && (
-                        <span className={`text-xs ${isSelected ? 'text-white' : 'text-blue-400'}`}>
-                          {dayRequests.length}
-                        </span>
+                        <span className={`text-xs ${isSelected ? 'text-white' : 'text-blue-400'}`}>{dayRequests.length}</span>
                       )}
                     </button>
                   )
@@ -285,51 +257,51 @@ export default function ManageShifts() {
           </div>
 
           {/* 右：選択した日の詳細 */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4 overflow-y-auto">
             {selectedDate ? (
               <>
-                <div className="bg-white rounded-2xl shadow p-6">
-                  <h2 className="font-medium text-gray-500 mb-4">
+                <div className="bg-white rounded-2xl shadow p-5">
+                  <h2 className="font-medium text-gray-500 mb-3">
                     {new Date(selectedDate + 'T00:00:00').toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short' })}の確定シフト
                   </h2>
                   {selectedDateShifts.length === 0 ? (
-                    <p className="text-gray-400 text-center py-6">まだ確定シフトがありません</p>
+                    <p className="text-gray-400 text-center py-4">まだ確定シフトがありません</p>
                   ) : (
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-2">
                       {selectedDateShifts.map((shift: any) => (
-                        <div key={shift.id} className="bg-green-50 rounded-xl p-4">
+                        <div key={shift.id} className="bg-green-50 rounded-xl p-3">
                           <div className="flex items-center justify-between">
                             <p className="font-semibold">{getStaffName(shift.staff_id)}</p>
                             <span className="text-green-600 font-semibold">✅ 確定</span>
                           </div>
-                          <p className="text-gray-500 text-sm mt-1">{shift.start_time?.slice(0, 5)} 〜 {shift.end_time?.slice(0, 5)}</p>
-                          {shift.role_id && <p className="text-gray-400 text-sm mt-1">{getRoleName(shift.role_id)}</p>}
+                          <p className="text-sm text-gray-500 mt-1">{shift.start_time?.slice(0, 5)} 〜 {shift.end_time?.slice(0, 5)}</p>
+                          {shift.role_id && <p className="text-sm text-gray-400 mt-1">{getRoleName(shift.role_id)}</p>}
                         </div>
                       ))}
                     </div>
                   )}
                   <button
                     onClick={handleRequestStaff}
-                    className="w-full mt-4 border border-orange-300 text-orange-500 py-3 rounded-xl font-semibold"
+                    className="w-full mt-3 border border-orange-300 text-orange-500 py-2 rounded-xl font-semibold"
                   >
                     {notifSent ? '✅ 送信しました！' : '⚠️ 人員不足を通知する'}
                   </button>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow p-6">
-                  <h2 className="font-medium text-gray-500 mb-4">シフト希望</h2>
+                <div className="bg-white rounded-2xl shadow p-5">
+                  <h2 className="font-medium text-gray-500 mb-3">シフト希望</h2>
                   {selectedDateRequests.length === 0 ? (
-                    <p className="text-gray-400 text-center py-6">希望がありません</p>
+                    <p className="text-gray-400 text-center py-4">希望がありません</p>
                   ) : (
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-2">
                       {selectedDateRequests.map((req: any) => (
-                        <div key={req.id} className="bg-blue-50 rounded-xl p-4">
+                        <div key={req.id} className="bg-blue-50 rounded-xl p-3">
                           <div className="flex items-center justify-between mb-1">
                             <p className="font-semibold">{getStaffName(req.staff_id)}</p>
                             <span className="text-blue-600">{getPriorityLabel(req.priority)}</span>
                           </div>
-                          <p className="text-gray-500 text-sm">{req.start_time?.slice(0, 5)} 〜 {req.end_time?.slice(0, 5)}</p>
-                          {req.role_id && <p className="text-gray-400 text-sm mt-1">{getRoleName(req.role_id)}</p>}
+                          <p className="text-sm text-gray-500">{req.start_time?.slice(0, 5)} 〜 {req.end_time?.slice(0, 5)}</p>
+                          {req.role_id && <p className="text-sm text-gray-400 mt-1">{getRoleName(req.role_id)}</p>}
                         </div>
                       ))}
                     </div>
@@ -337,7 +309,7 @@ export default function ManageShifts() {
                 </div>
               </>
             ) : (
-              <div className="bg-white rounded-2xl shadow p-6 flex items-center justify-center text-gray-400 h-48">
+              <div className="bg-white rounded-2xl shadow p-5 flex items-center justify-center text-gray-400 h-40">
                 カレンダーから日付を選択してください
               </div>
             )}
