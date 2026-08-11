@@ -76,7 +76,7 @@ export default function Dashboard() {
         <button onClick={handleLogout} className="text-sm text-gray-400">ログアウト</button>
       </div>
 
-      <div className="p-6 max-w-6xl mx-auto">
+      <div className="p-10 w-full">
         <div className="grid grid-cols-3 gap-6 items-stretch">
 
           {/* 左カラム */}
