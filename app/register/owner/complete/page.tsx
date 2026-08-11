@@ -21,7 +21,7 @@ function CompleteContent() {
 
   return (
     <div className="min-h-screen bg-blue-50 flex flex-col items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow p-8 w-full max-w-xs text-center">
+      <div className="bg-white rounded-2xl shadow p-8 w-full max-w-md text-center">
         <div className="text-5xl mb-4">🎉</div>
         <h1 className="text-2xl font-bold mb-2">登録完了！</h1>
         <p className="text-gray-400 text-sm mb-6">店舗コードをスタッフに共有してください</p>
