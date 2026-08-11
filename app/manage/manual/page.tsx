@@ -1,0 +1,449 @@
+﻿'use client'
+
+import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '../../lib/supabase'
+
+export default function ManageManual() {
+  const router = useRouter()
+  const [storeId, setStoreId] = useState('')
+  const [categories, setCategories] = useState<any[]>([])
+  const [manuals, setManuals] = useState<any[]>([])
+  const [openCategories, setOpenCategories] = useState<string[]>([])
+  const [newCategory, setNewCategory] = useState('')
+  const [newManualTitle, setNewManualTitle] = useState('')
+  const [newManualContent, setNewManualContent] = useState('')
+  const [selectedCategoryId, setSelectedCategoryId] = useState('')
+  const [showAddManual, setShowAddManual] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [selectedManual, setSelectedManual] = useState<any>(null)
+  const [editMode, setEditMode] = useState(false)
+  const [editTitle, setEditTitle] = useState('')
+  const [editContent, setEditContent] = useState('')
+  const [pdfFile, setPdfFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const editFileInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const fetchData = async () => {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const { data: owner } = await supabase
+      .from('owners')
+      .select('store_id')
+      .eq('user_id', user.id)
+      .single()
+
+    if (!owner) return
+    setStoreId(owner.store_id)
+
+    const { data: categoriesData } = await supabase
+      .from('manual_categories')
+      .select('*')
+      .eq('store_id', owner.store_id)
+      .order('created_at')
+
+    if (categoriesData) setCategories(categoriesData)
+
+    const { data: manualsData } = await supabase
+      .from('manuals')
+      .select('*')
+      .eq('store_id', owner.store_id)
+      .order('created_at')
+
+    if (manualsData) setManuals(manualsData)
+  }
+
+  const handleAddCategory = async () => {
+    if (!newCategory.trim()) return
+    const supabase = createClient()
+    await supabase.from('manual_categories').insert({ store_id: storeId, name: newCategory })
+    setNewCategory('')
+    fetchData()
+  }
+
+  const handleDeleteCategory = async (categoryId: string) => {
+    const supabase = createClient()
+    await supabase.from('manuals').delete().eq('category_id', categoryId)
+    await supabase.from('manual_categories').delete().eq('id', categoryId)
+    fetchData()
+  }
+
+  const uploadPdf = async (file: File) => {
+    const supabase = createClient()
+    const fileName = `${storeId}/${Date.now()}_${file.name}`
+    const { data: uploadData, error } = await supabase.storage
+      .from('manuals')
+      .upload(fileName, file)
+
+    if (error || !uploadData) return null
+
+    const { data: urlData } = supabase.storage
+      .from('manuals')
+      .getPublicUrl(fileName)
+
+    return urlData.publicUrl
+  }
+
+  const handleAddManual = async () => {
+    if (!newManualTitle.trim() || !selectedCategoryId) return
+    setLoading(true)
+    const supabase = createClient()
+
+    let fileUrl = null
+    if (pdfFile) {
+      setUploading(true)
+      fileUrl = await uploadPdf(pdfFile)
+      setUploading(false)
+    }
+
+    await supabase.from('manuals').insert({
+      store_id: storeId,
+      category_id: selectedCategoryId,
+      title: newManualTitle,
+      content: newManualContent,
+      file_url: fileUrl,
+    })
+
+    setNewManualTitle('')
+    setNewManualContent('')
+    setPdfFile(null)
+    setShowAddManual(false)
+    setLoading(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+    fetchData()
+  }
+
+  const handleDeleteManual = async (manualId: string) => {
+    const supabase = createClient()
+    await supabase.from('manuals').delete().eq('id', manualId)
+    setSelectedManual(null)
+    fetchData()
+  }
+
+  const handleEditManual = async () => {
+    if (!editTitle.trim()) return
+    setLoading(true)
+    const supabase = createClient()
+
+    let fileUrl = selectedManual.file_url
+    if (pdfFile) {
+      setUploading(true)
+      fileUrl = await uploadPdf(pdfFile)
+      setUploading(false)
+    }
+
+    await supabase
+      .from('manuals')
+      .update({ title: editTitle, content: editContent, file_url: fileUrl })
+      .eq('id', selectedManual.id)
+
+    setLoading(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+    setEditMode(false)
+    setPdfFile(null)
+    setSelectedManual({ ...selectedManual, title: editTitle, content: editContent, file_url: fileUrl })
+    fetchData()
+  }
+
+  const toggleCategory = (categoryId: string) => {
+    if (openCategories.includes(categoryId)) {
+      setOpenCategories(openCategories.filter(id => id !== categoryId))
+    } else {
+      setOpenCategories([...openCategories, categoryId])
+    }
+  }
+
+  const getManualsForCategory = (categoryId: string) => {
+    return manuals.filter(m => m.category_id === categoryId)
+  }
+
+  return (
+    <div className="min-h-screen bg-blue-50">
+      <div className="bg-white shadow-sm px-6 py-4 flex items-center gap-3">
+        <button onClick={() => router.push('/manage/dashboard')} className="text-gray-400">
+          &larr;
+        </button>
+        <h1 className="text-xl font-bold">📚マニュアル管理</h1>
+      </div>
+
+      <div className="p-6 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <div className="flex flex-col gap-4">
+            <div className="bg-white rounded-2xl shadow p-5">
+              <h2 className="text-sm font-medium text-gray-500 mb-3">マニュアル一覧</h2>
+
+              {categories.length === 0 && (
+                <p className="text-sm text-gray-400 text-center py-6">まだカテゴリがありません</p>
+              )}
+
+              <div className="flex flex-col gap-2">
+                {categories.map((cat: any) => (
+                  <div key={cat.id} className="border border-gray-200 rounded-xl overflow-hidden">
+                    <div
+                      className="flex items-center justify-between px-4 py-3 bg-gray-50 cursor-pointer hover:bg-blue-50"
+                      onClick={() => toggleCategory(cat.id)}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-400 text-sm">
+                          {openCategories.includes(cat.id) ? 'v' : '>'}
+                        </span>
+                        <p className="font-semibold text-sm">{cat.name}</p>
+                        <span className="text-xs text-gray-400">({getManualsForCategory(cat.id).length}件)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setSelectedCategoryId(cat.id)
+                            setShowAddManual(true)
+                            setSelectedManual(null)
+                            setEditMode(false)
+                            setPdfFile(null)
+                          }}
+                          className="text-xs text-blue-500 border border-blue-200 px-2 py-1 rounded-lg"
+                        >
+                          +追加
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteCategory(cat.id)
+                          }}
+                          className="text-xs text-red-400"
+                        >
+                          削除
+                        </button>
+                      </div>
+                    </div>
+
+                    {openCategories.includes(cat.id) && (
+                      <div className="flex flex-col">
+                        {getManualsForCategory(cat.id).length === 0 && (
+                          <p className="text-xs text-gray-400 px-4 py-3">まだマニュアルがありません</p>
+                        )}
+                        {getManualsForCategory(cat.id).map((manual: any) => (
+                          <div
+                            key={manual.id}
+                            onClick={() => {
+                              setSelectedManual(manual)
+                              setShowAddManual(false)
+                              setEditMode(false)
+                              setPdfFile(null)
+                            }}
+                            className={`flex items-center justify-between px-4 py-2 border-t border-gray-100 cursor-pointer hover:bg-blue-50 ${selectedManual?.id === manual.id ? 'bg-blue-50' : ''}`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm">{manual.title}</p>
+                              {manual.file_url && (
+                                <span className="text-xs text-red-400">PDF</span>
+                              )}
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteManual(manual.id)
+                              }}
+                              className="text-xs text-red-400"
+                            >
+                              削除
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col gap-2 mt-4">
+                <input
+                  type="text"
+                  placeholder="新しいカテゴリ名"
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                />
+                <button
+                  onClick={handleAddCategory}
+                  className="w-full bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-semibold"
+                >
+                  追加
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow p-5">
+            {showAddManual ? (
+              <div className="flex flex-col gap-3">
+                <h2 className="text-sm font-medium text-gray-500">マニュアルを追加</h2>
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">タイトル</p>
+                  <input
+                    type="text"
+                    placeholder="例：オープン作業手順"
+                    value={newManualTitle}
+                    onChange={(e) => setNewManualTitle(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">内容</p>
+                  <textarea
+                    placeholder="マニュアルの内容を入力してください"
+                    value={newManualContent}
+                    onChange={(e) => setNewManualContent(e.target.value)}
+                    rows={6}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none"
+                  />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">PDFファイル（任意）</p>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    ref={fileInputRef}
+                    onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
+                    className="hidden"
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full border border-dashed border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-400 hover:bg-gray-50"
+                  >
+                    {pdfFile ? pdfFile.name : 'PDFをアップロード'}
+                  </button>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setShowAddManual(false)
+                      setPdfFile(null)
+                    }}
+                    className="flex-1 border border-gray-300 text-gray-500 py-2 rounded-xl text-sm"
+                  >
+                    キャンセル
+                  </button>
+                  <button
+                    onClick={handleAddManual}
+                    disabled={loading || uploading || !newManualTitle.trim()}
+                    className="flex-1 bg-blue-600 text-white py-2 rounded-xl text-sm font-semibold disabled:opacity-50"
+                  >
+                    {uploading ? 'アップロード中...' : loading ? '追加中...' : '追加する'}
+                  </button>
+                </div>
+              </div>
+            ) : selectedManual ? (
+              <div>
+                {editMode ? (
+                  <div className="flex flex-col gap-3">
+                    <h2 className="text-sm font-medium text-gray-500">編集</h2>
+                    <div>
+                      <p className="text-xs text-gray-400 mb-1">タイトル</p>
+                      <input
+                        type="text"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-400 mb-1">内容</p>
+                      <textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        rows={6}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-400 mb-1">PDFファイル（任意）</p>
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        ref={editFileInputRef}
+                        onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
+                        className="hidden"
+                      />
+                      <button
+                        onClick={() => editFileInputRef.current?.click()}
+                        className="w-full border border-dashed border-gray-300 rounded-lg px-3 py-3 text-sm text-gray-400 hover:bg-gray-50"
+                      >
+                        {pdfFile ? pdfFile.name : selectedManual.file_url ? 'PDFを変更する' : 'PDFをアップロード'}
+                      </button>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setEditMode(false)
+                          setPdfFile(null)
+                        }}
+                        className="flex-1 border border-gray-300 text-gray-500 py-2 rounded-xl text-sm"
+                      >
+                        キャンセル
+                      </button>
+                      <button
+                        onClick={handleEditManual}
+                        disabled={loading || uploading}
+                        className="flex-1 bg-blue-600 text-white py-2 rounded-xl text-sm font-semibold disabled:opacity-50"
+                      >
+                        {uploading ? 'アップロード中...' : saved ? '保存しました！' : loading ? '保存中...' : '保存する'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h2 className="text-sm font-medium text-gray-500">マニュアル詳細</h2>
+                      <button
+                        onClick={() => {
+                          setEditMode(true)
+                          setEditTitle(selectedManual.title)
+                          setEditContent(selectedManual.content || '')
+                        }}
+                        className="text-xs text-blue-500 border border-blue-200 px-2 py-1 rounded-lg"
+                      >
+                        編集
+                      </button>
+                    </div>
+                    <p className="text-lg font-bold mb-3">{selectedManual.title}</p>
+                    {selectedManual.content && (
+                      <div className="bg-gray-50 rounded-xl p-4 mb-3">
+                        <p className="text-sm text-gray-700 whitespace-pre-wrap">{selectedManual.content}</p>
+                      </div>
+                    )}
+                    {selectedManual.file_url && (
+                      <a
+                        href={selectedManual.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600 font-semibold"
+                      >
+                        📄PDFを開く
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-400 text-sm text-center">
+                左からマニュアルを選択するか<br />カテゴリの+追加を押してください
+              </div>
+            )}
+          </div>
+
+        </div>
+      </div>
+    </div>
+  )
+}
