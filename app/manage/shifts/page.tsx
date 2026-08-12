@@ -184,24 +184,24 @@ export default function ManageShifts() {
 
   return (
     <div className="min-h-screen bg-blue-50">
-      <div className="bg-white shadow-sm px-8 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="bg-white shadow-sm px-4 md:px-8 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
           <button onClick={() => router.push('/manage/dashboard')} className="text-gray-400 text-xl">←</button>
-          <h1 className="text-2xl font-bold">📅 シフト管理</h1>
+          <h1 className="text-xl md:text-2xl font-bold">📅 シフト管理</h1>
         </div>
         <button
           onClick={handleAutoAssign}
           disabled={autoLoading}
-          className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold disabled:opacity-50"
+          className="bg-blue-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-xl font-semibold disabled:opacity-50 text-sm md:text-base"
         >
-          {autoSaved ? '✅ 振り分け完了！' : autoLoading ? '振り分け中...' : '🤖 自動振り分け'}
+          {autoSaved ? '✅ 完了！' : autoLoading ? '処理中...' : '🤖 自動振り分け'}
         </button>
       </div>
 
-      <div className="p-6">
-        <div className="grid grid-cols-2 gap-6">
+      <div className="p-4 md:p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
 
-          {/* 左：カレンダー */}
+          {/* カレンダー */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <button onClick={() => setCurrentMonth(new Date(year, month - 1, 1))} className="text-gray-600 px-3 py-1 text-xl">←</button>
@@ -257,7 +257,7 @@ export default function ManageShifts() {
             </div>
           </div>
 
-          {/* 右：選択した日の詳細 */}
+          {/* 選択した日の詳細 */}
           <div className="flex flex-col gap-4">
             {selectedDate ? (
               <>
