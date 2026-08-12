@@ -78,7 +78,8 @@ export default function ManageManual() {
 
   const uploadPdf = async (file: File) => {
     const supabase = createClient()
-    const fileName = `${storeId}/${Date.now()}_${file.name}`
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${storeId}/${Date.now()}.${fileExt}`
     const { data: uploadData, error } = await supabase.storage
       .from('manuals')
       .upload(fileName, file)
