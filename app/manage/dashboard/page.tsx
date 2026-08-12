@@ -73,12 +73,12 @@ export default function Dashboard() {
         <button onClick={handleLogout} className="text-sm text-gray-400">ログアウト</button>
       </div>
 
-      <div className="p-4 md:p-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
+      <div className="p-4 md:p-8 h-[calc(100vh-64px)]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 h-full">
 
           {/* 左カラム */}
           <div className="flex flex-col gap-4">
-            <div className="bg-white rounded-2xl shadow p-5">
+            <div className="bg-white rounded-2xl shadow p-5 flex-1">
               <h2 className="font-medium text-gray-500 mb-4">📊 今月のシフト状況</h2>
               <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
@@ -96,7 +96,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow p-5">
+            <div className="bg-white rounded-2xl shadow p-5 flex-1">
               <h2 className="font-medium text-gray-500 mb-4">📅 今日の状況</h2>
               <div className="flex items-center justify-between">
                 <p className="text-gray-600">出勤予定</p>
@@ -106,10 +106,10 @@ export default function Dashboard() {
           </div>
 
           {/* 中カラム */}
-          <div className="grid grid-cols-2 md:grid-cols-1 gap-4">
+          <div className="flex flex-col gap-4 md:gap-8">
             <button
               onClick={() => router.push('/manage/shifts')}
-              className="bg-white rounded-2xl shadow p-5 text-left hover:bg-blue-50"
+              className="bg-white rounded-2xl shadow p-5 text-left hover:bg-blue-50 flex-1 flex flex-col justify-center"
             >
               <div className="text-3xl md:text-5xl mb-2 md:mb-4">📅</div>
               <p className="font-bold md:text-xl">シフト管理</p>
@@ -117,7 +117,7 @@ export default function Dashboard() {
             </button>
             <button
               onClick={() => router.push('/manage/staff')}
-              className="bg-white rounded-2xl shadow p-5 text-left hover:bg-blue-50"
+              className="bg-white rounded-2xl shadow p-5 text-left hover:bg-blue-50 flex-1 flex flex-col justify-center"
             >
               <div className="text-3xl md:text-5xl mb-2 md:mb-4">👥</div>
               <p className="font-bold md:text-xl">スタッフ一覧</p>
@@ -126,10 +126,10 @@ export default function Dashboard() {
           </div>
 
           {/* 右カラム */}
-          <div className="grid grid-cols-2 md:grid-cols-1 gap-4">
+          <div className="flex flex-col gap-4 md:gap-8">
             <button
               onClick={() => router.push('/manage/manual')}
-              className="bg-white rounded-2xl shadow p-5 text-left hover:bg-blue-50"
+              className="bg-white rounded-2xl shadow p-5 text-left hover:bg-blue-50 flex-1 flex flex-col justify-center"
             >
               <div className="text-3xl md:text-5xl mb-2 md:mb-4">📚</div>
               <p className="font-bold md:text-xl">マニュアル管理</p>
@@ -137,7 +137,7 @@ export default function Dashboard() {
             </button>
             <button
               onClick={() => router.push('/manage/notifications')}
-              className="bg-white rounded-2xl shadow p-5 text-left hover:bg-blue-50"
+              className="bg-white rounded-2xl shadow p-5 text-left hover:bg-blue-50 flex-1 flex flex-col justify-center"
             >
               <div className="text-3xl md:text-5xl mb-2 md:mb-4">📢</div>
               <p className="font-bold md:text-xl">お知らせ送信</p>
@@ -145,7 +145,7 @@ export default function Dashboard() {
             </button>
             <button
               onClick={() => router.push('/manage/settings')}
-              className="bg-white rounded-2xl shadow p-5 text-left hover:bg-blue-50 col-span-2 md:col-span-1"
+              className="bg-white rounded-2xl shadow p-5 text-left hover:bg-blue-50 flex-1 flex flex-col justify-center"
             >
               <div className="text-3xl md:text-5xl mb-2 md:mb-4">⚙️</div>
               <p className="font-bold md:text-xl">設定</p>
