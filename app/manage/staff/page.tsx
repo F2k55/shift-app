@@ -116,16 +116,16 @@ export default function ManageStaff() {
 
   return (
     <div className="min-h-screen bg-blue-50">
-      <div className="bg-white shadow-sm px-8 py-5 flex items-center gap-4">
+      <div className="bg-white shadow-sm px-4 md:px-8 py-4 flex items-center gap-3">
         <button onClick={() => router.push('/manage/dashboard')} className="text-gray-400 text-xl">←</button>
-        <h1 className="text-2xl font-bold">👥 スタッフ一覧</h1>
+        <h1 className="text-xl md:text-2xl font-bold">👥 スタッフ一覧</h1>
       </div>
 
-      <div className="p-8 w-full">
-        <div className="grid grid-cols-2 gap-8">
+      <div className="p-4 md:p-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
 
-          {/* 左：スタッフ一覧 */}
-          <div className="bg-white rounded-2xl shadow p-6">
+          {/* スタッフ一覧 */}
+          <div className="bg-white rounded-2xl shadow p-5">
             <h2 className="font-medium text-gray-500 mb-4">スタッフ一覧（{staff.length}人）</h2>
             {staff.length === 0 && (
               <p className="text-gray-400 text-center py-8">まだスタッフがいません</p>
@@ -148,8 +148,8 @@ export default function ManageStaff() {
             </div>
           </div>
 
-          {/* 右：スタッフ詳細 */}
-          <div className="bg-white rounded-2xl shadow p-6">
+          {/* スタッフ詳細 */}
+          <div className="bg-white rounded-2xl shadow p-5">
             {selectedStaff ? (
               <>
                 <h2 className="font-medium text-gray-500 mb-2">スタッフ詳細</h2>
@@ -199,7 +199,7 @@ export default function ManageStaff() {
                 </button>
               </>
             ) : (
-              <div className="flex items-center justify-center h-full text-gray-400">
+              <div className="flex items-center justify-center h-full text-gray-400 min-h-40">
                 左のスタッフを選択してください
               </div>
             )}
