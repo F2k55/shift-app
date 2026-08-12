@@ -204,15 +204,15 @@ export default function ManageShifts() {
           {/* 左：カレンダー */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
-              <button onClick={() => setCurrentMonth(new Date(year, month - 1, 1))} className="text-gray-400 px-3 py-1 text-xl">←</button>
+              <button onClick={() => setCurrentMonth(new Date(year, month - 1, 1))} className="text-gray-600 px-3 py-1 text-xl">←</button>
               <p className="text-lg font-bold">{year}年{month + 1}月</p>
-              <button onClick={() => setCurrentMonth(new Date(year, month + 1, 1))} className="text-gray-400 px-3 py-1 text-xl">→</button>
+              <button onClick={() => setCurrentMonth(new Date(year, month + 1, 1))} className="text-gray-600 px-3 py-1 text-xl">→</button>
             </div>
 
             <div className="bg-white rounded-2xl shadow p-4">
               <div className="grid grid-cols-7 mb-2">
                 {DAYS.map((day, i) => (
-                  <div key={i} className={`text-center font-medium py-1 text-sm ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-gray-500'}`}>
+                  <div key={i} className={`text-center font-bold py-1 ${i === 0 ? 'text-red-500' : i === 6 ? 'text-blue-500' : 'text-gray-700'}`}>
                     {day}
                   </div>
                 ))}
@@ -231,18 +231,19 @@ export default function ManageShifts() {
                     <button
                       key={day}
                       onClick={() => setSelectedDate(dateStr)}
-                      className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm
+                      className={`aspect-square rounded-xl flex flex-col items-center justify-center
                         ${isSelected ? 'bg-blue-600 text-white' : 'hover:bg-blue-50'}
-                        ${!isSelected && dayOfWeek === 0 ? 'text-red-400' : ''}
-                        ${!isSelected && dayOfWeek === 6 ? 'text-blue-400' : ''}
+                        ${!isSelected && dayOfWeek === 0 ? 'text-red-500' : ''}
+                        ${!isSelected && dayOfWeek === 6 ? 'text-blue-500' : ''}
+                        ${!isSelected && dayOfWeek !== 0 && dayOfWeek !== 6 ? 'text-gray-800' : ''}
                       `}
                     >
-                      <span>{day}</span>
+                      <span className="text-base font-medium">{day}</span>
                       {dayShifts.length > 0 && (
-                        <span className={`text-xs ${isSelected ? 'text-white' : 'text-green-500'}`}>{dayShifts.length}</span>
+                        <span className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-green-600'}`}>{dayShifts.length}</span>
                       )}
                       {dayShifts.length === 0 && dayRequests.length > 0 && (
-                        <span className={`text-xs ${isSelected ? 'text-white' : 'text-blue-400'}`}>{dayRequests.length}</span>
+                        <span className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-blue-600'}`}>{dayRequests.length}</span>
                       )}
                     </button>
                   )
@@ -250,7 +251,7 @@ export default function ManageShifts() {
               </div>
             </div>
 
-            <div className="flex gap-4 text-sm text-gray-400">
+            <div className="flex gap-4 text-gray-600 font-medium">
               <span>🔵 希望あり</span>
               <span>🟢 確定済み</span>
             </div>
