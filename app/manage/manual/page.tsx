@@ -444,7 +444,7 @@ export default function ManageManual() {
                       />
                     )}
                     {selectedManual.file_url && !isImage(selectedManual.file_url) && (
-                      
+                      <a
                         href={selectedManual.file_url}
                         target="_blank"
                         rel="noopener noreferrer"
