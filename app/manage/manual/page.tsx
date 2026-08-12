@@ -21,7 +21,7 @@ export default function ManageManual() {
   const [editMode, setEditMode] = useState(false)
   const [editTitle, setEditTitle] = useState('')
   const [editContent, setEditContent] = useState('')
-  const [pdfFile, setPdfFile] = useState<File | null>(null)
+  const [uploadFile, setUploadFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const editFileInputRef = useRef<HTMLInputElement>(null)
@@ -76,7 +76,7 @@ export default function ManageManual() {
     fetchData()
   }
 
-  const uploadPdf = async (file: File) => {
+  const handleUploadFile = async (file: File) => {
     const supabase = createClient()
     const fileExt = file.name.split('.').pop()
     const fileName = `${storeId}/${Date.now()}.${fileExt}`
@@ -93,15 +93,19 @@ export default function ManageManual() {
     return urlData.publicUrl
   }
 
+  const isImage = (url: string) => {
+    return url?.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+  }
+
   const handleAddManual = async () => {
     if (!newManualTitle.trim() || !selectedCategoryId) return
     setLoading(true)
     const supabase = createClient()
 
     let fileUrl = null
-    if (pdfFile) {
+    if (uploadFile) {
       setUploading(true)
-      fileUrl = await uploadPdf(pdfFile)
+      fileUrl = await handleUploadFile(uploadFile)
       setUploading(false)
     }
 
@@ -115,7 +119,7 @@ export default function ManageManual() {
 
     setNewManualTitle('')
     setNewManualContent('')
-    setPdfFile(null)
+    setUploadFile(null)
     setShowAddManual(false)
     setLoading(false)
     setSaved(true)
@@ -136,9 +140,9 @@ export default function ManageManual() {
     const supabase = createClient()
 
     let fileUrl = selectedManual.file_url
-    if (pdfFile) {
+    if (uploadFile) {
       setUploading(true)
-      fileUrl = await uploadPdf(pdfFile)
+      fileUrl = await handleUploadFile(uploadFile)
       setUploading(false)
     }
 
@@ -151,7 +155,7 @@ export default function ManageManual() {
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
     setEditMode(false)
-    setPdfFile(null)
+    setUploadFile(null)
     setSelectedManual({ ...selectedManual, title: editTitle, content: editContent, file_url: fileUrl })
     fetchData()
   }
@@ -208,7 +212,7 @@ export default function ManageManual() {
                             setShowAddManual(true)
                             setSelectedManual(null)
                             setEditMode(false)
-                            setPdfFile(null)
+                            setUploadFile(null)
                           }}
                           className="text-blue-500 border border-blue-200 px-2 py-1 rounded-lg text-sm"
                         >
@@ -238,14 +242,17 @@ export default function ManageManual() {
                               setSelectedManual(manual)
                               setShowAddManual(false)
                               setEditMode(false)
-                              setPdfFile(null)
+                              setUploadFile(null)
                             }}
                             className={`flex items-center justify-between px-4 py-3 border-t border-gray-100 cursor-pointer hover:bg-blue-50 ${selectedManual?.id === manual.id ? 'bg-blue-50' : ''}`}
                           >
                             <div className="flex items-center gap-2">
                               <p>{manual.title}</p>
-                              {manual.file_url && (
-                                <span className="text-sm text-red-400">PDF</span>
+                              {manual.file_url && isImage(manual.file_url) && (
+                                <span className="text-sm text-green-500">📷</span>
+                              )}
+                              {manual.file_url && !isImage(manual.file_url) && (
+                                <span className="text-sm text-red-400">📄</span>
                               )}
                             </div>
                             <button
@@ -308,24 +315,31 @@ export default function ManageManual() {
                   />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400 mb-2">PDFファイル（任意）</p>
+                  <p className="text-sm text-gray-400 mb-2">画像・PDFファイル（任意）</p>
                   <input
                     type="file"
-                    accept=".pdf"
+                    accept=".pdf,image/*"
                     ref={fileInputRef}
-                    onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
+                    onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
                     className="hidden"
                   />
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     className="w-full border border-dashed border-gray-300 rounded-lg px-4 py-3 text-gray-400 hover:bg-gray-50"
                   >
-                    {pdfFile ? pdfFile.name : 'PDFをアップロード'}
+                    {uploadFile ? uploadFile.name : '📷 画像 / 📄 PDFをアップロード'}
                   </button>
+                  {uploadFile && uploadFile.type.startsWith('image/') && (
+                    <img
+                      src={URL.createObjectURL(uploadFile)}
+                      alt="preview"
+                      className="mt-2 w-full rounded-lg object-cover max-h-40"
+                    />
+                  )}
                 </div>
                 <div className="flex gap-3">
                   <button
-                    onClick={() => { setShowAddManual(false); setPdfFile(null) }}
+                    onClick={() => { setShowAddManual(false); setUploadFile(null) }}
                     className="flex-1 border border-gray-300 text-gray-500 py-3 rounded-xl"
                   >
                     キャンセル
@@ -363,24 +377,31 @@ export default function ManageManual() {
                       />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-400 mb-2">PDFファイル（任意）</p>
+                      <p className="text-sm text-gray-400 mb-2">画像・PDFファイル（任意）</p>
                       <input
                         type="file"
-                        accept=".pdf"
+                        accept=".pdf,image/*"
                         ref={editFileInputRef}
-                        onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
+                        onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
                         className="hidden"
                       />
                       <button
                         onClick={() => editFileInputRef.current?.click()}
                         className="w-full border border-dashed border-gray-300 rounded-lg px-4 py-3 text-gray-400 hover:bg-gray-50"
                       >
-                        {pdfFile ? pdfFile.name : selectedManual.file_url ? 'PDFを変更する' : 'PDFをアップロード'}
+                        {uploadFile ? uploadFile.name : selectedManual.file_url ? 'ファイルを変更する' : '📷 画像 / 📄 PDFをアップロード'}
                       </button>
+                      {uploadFile && uploadFile.type.startsWith('image/') && (
+                        <img
+                          src={URL.createObjectURL(uploadFile)}
+                          alt="preview"
+                          className="mt-2 w-full rounded-lg object-cover max-h-40"
+                        />
+                      )}
                     </div>
                     <div className="flex gap-3">
                       <button
-                        onClick={() => { setEditMode(false); setPdfFile(null) }}
+                        onClick={() => { setEditMode(false); setUploadFile(null) }}
                         className="flex-1 border border-gray-300 text-gray-500 py-3 rounded-xl"
                       >
                         キャンセル
@@ -415,8 +436,15 @@ export default function ManageManual() {
                         <p className="text-gray-700 whitespace-pre-wrap">{selectedManual.content}</p>
                       </div>
                     )}
-                    {selectedManual.file_url && (
-                      <a
+                    {selectedManual.file_url && isImage(selectedManual.file_url) && (
+                      <img
+                        src={selectedManual.file_url}
+                        alt={selectedManual.title}
+                        className="w-full rounded-xl object-cover max-h-64 mb-3"
+                      />
+                    )}
+                    {selectedManual.file_url && !isImage(selectedManual.file_url) && (
+                      
                         href={selectedManual.file_url}
                         target="_blank"
                         rel="noopener noreferrer"
