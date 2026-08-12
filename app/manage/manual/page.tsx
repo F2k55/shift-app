@@ -169,16 +169,16 @@ export default function ManageManual() {
 
   return (
     <div className="min-h-screen bg-blue-50">
-      <div className="bg-white shadow-sm px-8 py-5 flex items-center gap-4">
+      <div className="bg-white shadow-sm px-4 md:px-8 py-4 flex items-center gap-3">
         <button onClick={() => router.push('/manage/dashboard')} className="text-gray-400 text-xl">←</button>
-        <h1 className="text-2xl font-bold">📚 マニュアル管理</h1>
+        <h1 className="text-xl md:text-2xl font-bold">📚 マニュアル管理</h1>
       </div>
 
-      <div className="p-8 w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="p-4 md:p-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
 
-          <div className="flex flex-col gap-6">
-            <div className="bg-white rounded-2xl shadow p-6">
+          <div className="flex flex-col gap-4">
+            <div className="bg-white rounded-2xl shadow p-5">
               <h2 className="font-medium text-gray-500 mb-4">マニュアル一覧</h2>
 
               {categories.length === 0 && (
@@ -189,17 +189,17 @@ export default function ManageManual() {
                 {categories.map((cat: any) => (
                   <div key={cat.id} className="border border-gray-200 rounded-xl overflow-hidden">
                     <div
-                      className="flex items-center justify-between px-5 py-4 bg-gray-50 cursor-pointer hover:bg-blue-50"
+                      className="flex items-center justify-between px-4 py-3 bg-gray-50 cursor-pointer hover:bg-blue-50"
                       onClick={() => toggleCategory(cat.id)}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
                         <span className="text-gray-400">
                           {openCategories.includes(cat.id) ? 'v' : '>'}
                         </span>
                         <p className="font-semibold">{cat.name}</p>
                         <span className="text-sm text-gray-400">({getManualsForCategory(cat.id).length}件)</span>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
                         <button
                           onClick={(e) => {
                             e.stopPropagation()
@@ -209,7 +209,7 @@ export default function ManageManual() {
                             setEditMode(false)
                             setPdfFile(null)
                           }}
-                          className="text-blue-500 border border-blue-200 px-3 py-1 rounded-lg text-sm"
+                          className="text-blue-500 border border-blue-200 px-2 py-1 rounded-lg text-sm"
                         >
                           +追加
                         </button>
@@ -228,7 +228,7 @@ export default function ManageManual() {
                     {openCategories.includes(cat.id) && (
                       <div className="flex flex-col">
                         {getManualsForCategory(cat.id).length === 0 && (
-                          <p className="text-sm text-gray-400 px-5 py-4">まだマニュアルがありません</p>
+                          <p className="text-sm text-gray-400 px-4 py-3">まだマニュアルがありません</p>
                         )}
                         {getManualsForCategory(cat.id).map((manual: any) => (
                           <div
@@ -239,7 +239,7 @@ export default function ManageManual() {
                               setEditMode(false)
                               setPdfFile(null)
                             }}
-                            className={`flex items-center justify-between px-5 py-3 border-t border-gray-100 cursor-pointer hover:bg-blue-50 ${selectedManual?.id === manual.id ? 'bg-blue-50' : ''}`}
+                            className={`flex items-center justify-between px-4 py-3 border-t border-gray-100 cursor-pointer hover:bg-blue-50 ${selectedManual?.id === manual.id ? 'bg-blue-50' : ''}`}
                           >
                             <div className="flex items-center gap-2">
                               <p>{manual.title}</p>
@@ -282,7 +282,7 @@ export default function ManageManual() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow p-6">
+          <div className="bg-white rounded-2xl shadow p-5">
             {showAddManual ? (
               <div className="flex flex-col gap-4">
                 <h2 className="font-medium text-gray-500">マニュアルを追加</h2>
@@ -302,7 +302,7 @@ export default function ManageManual() {
                     placeholder="マニュアルの内容を入力してください"
                     value={newManualContent}
                     onChange={(e) => setNewManualContent(e.target.value)}
-                    rows={8}
+                    rows={6}
                     className="w-full border border-gray-300 rounded-lg px-4 py-3 resize-none"
                   />
                 </div>
@@ -357,7 +357,7 @@ export default function ManageManual() {
                       <textarea
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
-                        rows={8}
+                        rows={6}
                         className="w-full border border-gray-300 rounded-lg px-4 py-3 resize-none"
                       />
                     </div>
@@ -410,7 +410,7 @@ export default function ManageManual() {
                     </div>
                     <p className="text-xl font-bold mb-4">{selectedManual.title}</p>
                     {selectedManual.content && (
-                      <div className="bg-gray-50 rounded-xl p-5 mb-4">
+                      <div className="bg-gray-50 rounded-xl p-4 mb-4">
                         <p className="text-gray-700 whitespace-pre-wrap">{selectedManual.content}</p>
                       </div>
                     )}
@@ -419,7 +419,7 @@ export default function ManageManual() {
                         href={selectedManual.file_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-5 py-4 text-red-600 font-semibold"
+                        className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-600 font-semibold"
                       >
                         📄 PDFを開く
                       </a>
@@ -428,7 +428,7 @@ export default function ManageManual() {
                 )}
               </div>
             ) : (
-              <div className="flex items-center justify-center h-full text-gray-400 text-center">
+              <div className="flex items-center justify-center h-full text-gray-400 text-center min-h-40">
                 左からマニュアルを選択するか<br />カテゴリの+追加を押してください
               </div>
             )}
