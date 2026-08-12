@@ -310,7 +310,7 @@ export default function ManageManual() {
                     placeholder="マニュアルの内容を入力してください"
                     value={newManualContent}
                     onChange={(e) => setNewManualContent(e.target.value)}
-                    rows={6}
+                    rows={5}
                     className="w-full border border-gray-300 rounded-lg px-4 py-3 resize-none"
                   />
                 </div>
@@ -333,7 +333,7 @@ export default function ManageManual() {
                     <img
                       src={URL.createObjectURL(uploadFile)}
                       alt="preview"
-                      className="mt-2 w-full rounded-lg object-cover max-h-40"
+                      className="mt-2 w-full rounded-lg object-contain"
                     />
                   )}
                 </div>
@@ -372,7 +372,7 @@ export default function ManageManual() {
                       <textarea
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
-                        rows={6}
+                        rows={5}
                         className="w-full border border-gray-300 rounded-lg px-4 py-3 resize-none"
                       />
                     </div>
@@ -395,7 +395,7 @@ export default function ManageManual() {
                         <img
                           src={URL.createObjectURL(uploadFile)}
                           alt="preview"
-                          className="mt-2 w-full rounded-lg object-cover max-h-40"
+                          className="mt-2 w-full rounded-lg object-contain"
                         />
                       )}
                     </div>
@@ -440,11 +440,11 @@ export default function ManageManual() {
                       <img
                         src={selectedManual.file_url}
                         alt={selectedManual.title}
-                        className="w-full rounded-xl object-cover max-h-64 mb-3"
+                        className="w-full rounded-xl object-contain mb-3"
                       />
                     )}
                     {selectedManual.file_url && !isImage(selectedManual.file_url) && (
-                      <a
+                      
                         href={selectedManual.file_url}
                         target="_blank"
                         rel="noopener noreferrer"
