@@ -9,6 +9,7 @@ export default function OwnerLogin() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -22,6 +23,12 @@ export default function OwnerLogin() {
       setError(result.error)
       setLoading(false)
       return
+    }
+
+    if (rememberMe) {
+      localStorage.setItem('owner_email', email)
+    } else {
+      localStorage.removeItem('owner_email')
     }
 
     router.push('/manage/dashboard')
@@ -61,6 +68,17 @@ export default function OwnerLogin() {
                 {showPassword ? '隠す' : '表示'}
               </button>
             </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="rememberMe"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="w-4 h-4 accent-blue-600"
+            />
+            <label htmlFor="rememberMe" className="text-sm text-gray-600">メールアドレスを記憶する</label>
           </div>
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
