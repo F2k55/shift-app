@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { loginStaff } from '../../lib/auth'
 
@@ -9,8 +9,17 @@ export default function StaffLogin() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('staff_email')
+    if (savedEmail) {
+      setEmail(savedEmail)
+      setRememberMe(true)
+    }
+  }, [])
 
   const handleLogin = async () => {
     setLoading(true)
@@ -22,6 +31,12 @@ export default function StaffLogin() {
       setError(result.error)
       setLoading(false)
       return
+    }
+
+    if (rememberMe) {
+      localStorage.setItem('staff_email', email)
+    } else {
+      localStorage.removeItem('staff_email')
     }
 
     router.push('/store-select')
@@ -61,6 +76,17 @@ export default function StaffLogin() {
                 {showPassword ? '隠す' : '表示'}
               </button>
             </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="rememberMe"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="w-4 h-4 accent-green-500"
+            />
+            <label htmlFor="rememberMe" className="text-sm text-gray-600">メールアドレスを記憶する</label>
           </div>
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
