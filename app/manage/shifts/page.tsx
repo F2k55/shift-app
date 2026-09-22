@@ -20,6 +20,7 @@ export default function ManageShifts() {
   const [draftShifts, setDraftShifts] = useState<any[]>([])
   const [editingShift, setEditingShift] = useState<any>(null)
   const [confirmed, setConfirmed] = useState(false)
+  const [reviewView, setReviewView] = useState<'calendar' | 'timeline'>('calendar')
 
   useEffect(() => {
     fetchData()
@@ -129,6 +130,7 @@ export default function ManageShifts() {
     setDraftShifts(newDrafts)
     setAutoLoading(false)
     setReviewMode(true)
+    setReviewView('calendar')
   }
 
   const handleConfirmShifts = async () => {
@@ -158,7 +160,6 @@ export default function ManageShifts() {
       await supabase.from('shifts').insert(toInsert)
     }
 
-    // スタッフ全員にお知らせ送信
     await supabase.from('notifications').insert({
       store_id: storeId,
       staff_id: null,
@@ -215,6 +216,17 @@ export default function ManageShifts() {
     setTimeout(() => setNotifSent(false), 3000)
   }
 
+  const getStaffTotalHours = (staffId: string) => {
+    const staffShifts = draftShifts.filter(s => s.staff_id === staffId)
+    let total = 0
+    staffShifts.forEach(s => {
+      const start = s.start_time?.slice(0, 5).split(':').map(Number)
+      const end = s.end_time?.slice(0, 5).split(':').map(Number)
+      if (start && end) total += (end[0] * 60 + end[1] - start[0] * 60 - start[1]) / 60
+    })
+    return Math.round(total * 10) / 10
+  }
+
   const getDaysInMonth = () => {
     const year = currentMonth.getFullYear()
     const month = currentMonth.getMonth()
@@ -239,163 +251,265 @@ export default function ManageShifts() {
   const selectedDateShifts = selectedDate ? getShiftsForDate(selectedDate) : []
   const selectedDateDrafts = selectedDate ? getDraftsForDate(selectedDate) : []
 
+  // スタッフカラー
+  const staffColors = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16']
+  const getStaffColor = (staffId: string) => {
+    const idx = staff.findIndex(s => s.id === staffId)
+    return staffColors[idx % staffColors.length]
+  }
+
   // ─── 見直し画面 ───
   if (reviewMode) {
     return (
       <div className="min-h-screen bg-blue-50">
+        {/* ヘッダー */}
         <div className="bg-white shadow-sm px-4 md:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => setReviewMode(false)} className="text-gray-400 text-xl">←</button>
-            <h1 className="text-xl md:text-2xl font-bold">📋 シフト見直し</h1>
-            <span className="text-sm text-gray-400">{year}年{month + 1}月 · {draftShifts.length}件</span>
+            <h1 className="text-xl font-bold">📋 シフト見直し</h1>
+            <span className="text-sm text-gray-400">{year}年{month + 1}月</span>
           </div>
-          <button
-            onClick={handleConfirmShifts}
-            className="bg-green-500 text-white px-4 md:px-6 py-2 md:py-3 rounded-xl font-semibold"
-          >
-            ✅ 確定してスタッフに通知
-          </button>
+          <div className="flex items-center gap-3">
+            {/* 切替ボタン */}
+            <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
+              <button
+                onClick={() => setReviewView('calendar')}
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold ${reviewView === 'calendar' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}
+              >
+                📅 カレンダー
+              </button>
+              <button
+                onClick={() => setReviewView('timeline')}
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold ${reviewView === 'timeline' ? 'bg-white shadow text-blue-600' : 'text-gray-500'}`}
+              >
+                📊 タイムバー
+              </button>
+            </div>
+            <button
+              onClick={handleConfirmShifts}
+              className="bg-green-500 text-white px-4 py-2 rounded-xl font-semibold text-sm"
+            >
+              ✅ 確定・通知
+            </button>
+          </div>
         </div>
 
         <div className="p-4 md:p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
 
-            {/* 左：日付ごとのドラフト */}
-            <div className="bg-white rounded-2xl shadow p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-medium text-gray-500">振り分け結果</h2>
-                <button
-                  onClick={handleAddDraft}
-                  className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg"
-                >
-                  ＋ 手動追加
-                </button>
-              </div>
+          {/* ─── カレンダービュー ─── */}
+          {reviewView === 'calendar' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
 
-              {draftShifts.length === 0 && (
-                <p className="text-gray-400 text-center py-8">シフトがありません</p>
-              )}
-
-              <div className="flex flex-col gap-2 max-h-[60vh] overflow-y-auto">
-                {[...new Set(draftShifts.map(s => s.date))].sort().map(date => (
-                  <div key={date}>
-                    <p className="text-sm font-bold text-gray-600 mt-3 mb-1">
-                      {new Date(date + 'T00:00:00').toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric', weekday: 'short' })}
-                    </p>
-                    {draftShifts.filter(s => s.date === date).map(shift => (
-                      <div key={shift.id} className="flex items-center justify-between bg-blue-50 rounded-xl px-3 py-2 mb-1">
-                        <div>
-                          <p className="text-sm font-semibold">{getStaffName(shift.staff_id)}</p>
-                          <p className="text-xs text-gray-400">{shift.start_time?.slice(0,5)} 〜 {shift.end_time?.slice(0,5)} {getRoleName(shift.role_id)}</p>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => setEditingShift(shift)}
-                            className="text-xs text-blue-500 border border-blue-200 px-2 py-1 rounded-lg"
-                          >
-                            編集
-                          </button>
-                          <button
-                            onClick={() => handleDeleteDraft(shift.id)}
-                            className="text-xs text-red-400 border border-red-200 px-2 py-1 rounded-lg"
-                          >
-                            削除
-                          </button>
-                        </div>
-                      </div>
+              {/* 左：カレンダー */}
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <button onClick={() => setCurrentMonth(new Date(year, month - 1, 1))} className="text-gray-600 px-3 py-1 text-xl">←</button>
+                  <p className="text-lg font-bold">{year}年{month + 1}月</p>
+                  <button onClick={() => setCurrentMonth(new Date(year, month + 1, 1))} className="text-gray-600 px-3 py-1 text-xl">→</button>
+                </div>
+                <div className="bg-white rounded-2xl shadow p-4">
+                  <div className="grid grid-cols-7 mb-2">
+                    {DAYS.map((day, i) => (
+                      <div key={i} className={`text-center font-bold py-1 ${i === 0 ? 'text-red-500' : i === 6 ? 'text-blue-500' : 'text-gray-700'}`}>{day}</div>
                     ))}
                   </div>
-                ))}
+                  <div className="grid grid-cols-7 gap-1">
+                    {Array.from({ length: firstDay }).map((_, i) => <div key={i} />)}
+                    {Array.from({ length: daysInMonth }).map((_, i) => {
+                      const day = i + 1
+                      const dateStr = formatDate(year, month, day)
+                      const drafts = getDraftsForDate(dateStr)
+                      const isSelected = selectedDate === dateStr
+                      const dayOfWeek = new Date(year, month, day).getDay()
+                      return (
+                        <button
+                          key={day}
+                          onClick={() => setSelectedDate(dateStr)}
+                          className={`aspect-square rounded-xl flex flex-col items-center justify-center
+                            ${isSelected ? 'bg-blue-600 text-white' : 'hover:bg-blue-50'}
+                            ${!isSelected && dayOfWeek === 0 ? 'text-red-500' : ''}
+                            ${!isSelected && dayOfWeek === 6 ? 'text-blue-500' : ''}
+                            ${!isSelected && dayOfWeek !== 0 && dayOfWeek !== 6 ? 'text-gray-800' : ''}
+                          `}
+                        >
+                          <span className="text-base font-medium">{day}</span>
+                          {drafts.length > 0 && (
+                            <span className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-blue-500'}`}>{drafts.length}</span>
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* 右：選んだ日の編集 */}
+              <div className="flex flex-col gap-4">
+                {selectedDate ? (
+                  <>
+                    <div className="bg-white rounded-2xl shadow p-5">
+                      <div className="flex items-center justify-between mb-3">
+                        <h2 className="font-medium text-gray-500">
+                          {new Date(selectedDate + 'T00:00:00').toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short' })}のシフト
+                        </h2>
+                        <button
+                          onClick={handleAddDraft}
+                          className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg"
+                        >
+                          ＋ 追加
+                        </button>
+                      </div>
+                      {selectedDateDrafts.length === 0 ? (
+                        <p className="text-gray-400 text-center py-4">シフトがありません</p>
+                      ) : (
+                        <div className="flex flex-col gap-2">
+                          {selectedDateDrafts.map(shift => (
+                            <div key={shift.id} className="flex items-center justify-between bg-blue-50 rounded-xl px-3 py-2">
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-8 rounded-full" style={{ backgroundColor: getStaffColor(shift.staff_id) }} />
+                                <div>
+                                  <p className="text-sm font-semibold">{getStaffName(shift.staff_id)}</p>
+                                  <p className="text-xs text-gray-400">{shift.start_time?.slice(0,5)} 〜 {shift.end_time?.slice(0,5)}{getRoleName(shift.role_id) ? ` · ${getRoleName(shift.role_id)}` : ''}</p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <button onClick={() => setEditingShift(shift)} className="text-xs text-blue-500 border border-blue-200 px-2 py-1 rounded-lg">編集</button>
+                                <button onClick={() => handleDeleteDraft(shift.id)} className="text-xs text-red-400 border border-red-200 px-2 py-1 rounded-lg">削除</button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 編集フォーム */}
+                    {editingShift && (
+                      <div className="bg-white rounded-2xl shadow p-5">
+                        <h2 className="font-medium text-gray-500 mb-4">
+                          {draftShifts.find(s => s.id === editingShift.id) ? '編集' : '追加'}
+                        </h2>
+                        <div className="flex flex-col gap-3">
+                          <div>
+                            <p className="text-sm text-gray-400 mb-1">スタッフ</p>
+                            <select value={editingShift.staff_id} onChange={e => setEditingShift({ ...editingShift, staff_id: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2">
+                              {staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-400 mb-1">役割</p>
+                            <select value={editingShift.role_id} onChange={e => setEditingShift({ ...editingShift, role_id: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2">
+                              <option value="">なし</option>
+                              {roles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                            </select>
+                          </div>
+                          <div className="flex gap-3">
+                            <div className="flex-1">
+                              <p className="text-sm text-gray-400 mb-1">開始</p>
+                              <input type="time" value={editingShift.start_time?.slice(0,5)} onChange={e => setEditingShift({ ...editingShift, start_time: e.target.value + ':00' })} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm text-gray-400 mb-1">終了</p>
+                              <input type="time" value={editingShift.end_time?.slice(0,5)} onChange={e => setEditingShift({ ...editingShift, end_time: e.target.value + ':00' })} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+                            </div>
+                          </div>
+                          <div className="flex gap-3">
+                            <button onClick={() => setEditingShift(null)} className="flex-1 border border-gray-300 text-gray-500 py-2 rounded-xl">キャンセル</button>
+                            <button onClick={handleSaveEdit} className="flex-1 bg-blue-600 text-white py-2 rounded-xl font-semibold">保存</button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="bg-white rounded-2xl shadow p-5 flex items-center justify-center text-gray-400 min-h-40">
+                    カレンダーから日付を選択してください
+                  </div>
+                )}
               </div>
             </div>
+          )}
 
-            {/* 右：編集フォーム */}
-            <div className="bg-white rounded-2xl shadow p-5">
-              {editingShift ? (
-                <div className="flex flex-col gap-4">
-                  <h2 className="font-medium text-gray-500">シフトを{draftShifts.find(s => s.id === editingShift.id) ? '編集' : '追加'}</h2>
+          {/* ─── タイムバービュー ─── */}
+          {reviewView === 'timeline' && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
 
-                  <div>
-                    <p className="text-sm text-gray-400 mb-1">日付</p>
-                    <input
-                      type="date"
-                      value={editingShift.date}
-                      onChange={e => setEditingShift({ ...editingShift, date: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    />
+              {/* 左2/3：タイムバー */}
+              <div className="md:col-span-2 bg-white rounded-2xl shadow p-5 overflow-x-auto">
+                <h2 className="font-medium text-gray-500 mb-4">{year}年{month + 1}月 シフト一覧</h2>
+                <div style={{ minWidth: `${daysInMonth * 28 + 80}px` }}>
+                  {/* 日付ヘッダー */}
+                  <div className="flex mb-2">
+                    <div className="w-20 shrink-0" />
+                    {Array.from({ length: daysInMonth }).map((_, i) => {
+                      const day = i + 1
+                      const dayOfWeek = new Date(year, month, day).getDay()
+                      return (
+                        <div key={day} className={`w-7 shrink-0 text-center text-xs font-bold ${dayOfWeek === 0 ? 'text-red-500' : dayOfWeek === 6 ? 'text-blue-500' : 'text-gray-600'}`}>
+                          {day}
+                        </div>
+                      )
+                    })}
                   </div>
-
-                  <div>
-                    <p className="text-sm text-gray-400 mb-1">スタッフ</p>
-                    <select
-                      value={editingShift.staff_id}
-                      onChange={e => setEditingShift({ ...editingShift, staff_id: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    >
-                      {staff.map(s => (
-                        <option key={s.id} value={s.id}>{s.name}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-gray-400 mb-1">役割</p>
-                    <select
-                      value={editingShift.role_id}
-                      onChange={e => setEditingShift({ ...editingShift, role_id: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    >
-                      <option value="">なし</option>
-                      {roles.map(r => (
-                        <option key={r.id} value={r.id}>{r.name}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-400 mb-1">開始時間</p>
-                      <input
-                        type="time"
-                        value={editingShift.start_time?.slice(0,5)}
-                        onChange={e => setEditingShift({ ...editingShift, start_time: e.target.value + ':00' })}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-400 mb-1">終了時間</p>
-                      <input
-                        type="time"
-                        value={editingShift.end_time?.slice(0,5)}
-                        onChange={e => setEditingShift({ ...editingShift, end_time: e.target.value + ':00' })}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setEditingShift(null)}
-                      className="flex-1 border border-gray-300 text-gray-500 py-2 rounded-xl"
-                    >
-                      キャンセル
-                    </button>
-                    <button
-                      onClick={handleSaveEdit}
-                      className="flex-1 bg-blue-600 text-white py-2 rounded-xl font-semibold"
-                    >
-                      保存
-                    </button>
-                  </div>
+                  {/* スタッフ行 */}
+                  {staff.map(s => {
+                    const color = getStaffColor(s.id)
+                    return (
+                      <div key={s.id} className="flex items-center mb-1">
+                        <div className="w-20 shrink-0 text-sm font-medium text-gray-700 truncate pr-2">{s.name}</div>
+                        {Array.from({ length: daysInMonth }).map((_, i) => {
+                          const day = i + 1
+                          const dateStr = formatDate(year, month, day)
+                          const hasShift = draftShifts.some(d => d.staff_id === s.id && d.date === dateStr)
+                          return (
+                            <div
+                              key={day}
+                              className="w-7 h-6 shrink-0 rounded mx-px flex items-center justify-center cursor-pointer"
+                              style={{ backgroundColor: hasShift ? color : '#f3f4f6' }}
+                              onClick={() => { setSelectedDate(dateStr); setReviewView('calendar') }}
+                              title={hasShift ? `${s.name} - ${dateStr}` : ''}
+                            >
+                              {hasShift && <span className="text-white text-xs">●</span>}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )
+                  })}
                 </div>
-              ) : (
-                <div className="flex items-center justify-center h-full text-gray-400 text-center min-h-40">
-                  左のシフトを選択して編集するか<br />「＋手動追加」を押してください
+              </div>
+
+              {/* 右1/3：合計時間 */}
+              <div className="bg-white rounded-2xl shadow p-5">
+                <h2 className="font-medium text-gray-500 mb-4">スタッフ別集計</h2>
+                <div className="flex flex-col gap-3">
+                  {staff.map(s => {
+                    const hours = getStaffTotalHours(s.id)
+                    const days = draftShifts.filter(d => d.staff_id === s.id).length
+                    const color = getStaffColor(s.id)
+                    return (
+                      <div key={s.id} className="flex items-center gap-3">
+                        <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-gray-700">{s.name}</p>
+                          <div className="flex gap-2 text-xs text-gray-400">
+                            <span>{days}日</span>
+                            <span>{hours}h</span>
+                          </div>
+                          <div className="w-full bg-gray-100 rounded-full h-1.5 mt-1">
+                            <div className="h-1.5 rounded-full" style={{ backgroundColor: color, width: `${Math.min((hours / 160) * 100, 100)}%` }} />
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
-              )}
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <p className="text-xs text-gray-400">合計シフト数</p>
+                  <p className="text-2xl font-bold text-blue-600">{draftShifts.length}件</p>
+                </div>
+              </div>
             </div>
-
-          </div>
+          )}
         </div>
       </div>
     )
@@ -431,9 +545,7 @@ export default function ManageShifts() {
             <div className="bg-white rounded-2xl shadow p-4">
               <div className="grid grid-cols-7 mb-2">
                 {DAYS.map((day, i) => (
-                  <div key={i} className={`text-center font-bold py-1 ${i === 0 ? 'text-red-500' : i === 6 ? 'text-blue-500' : 'text-gray-700'}`}>
-                    {day}
-                  </div>
+                  <div key={i} className={`text-center font-bold py-1 ${i === 0 ? 'text-red-500' : i === 6 ? 'text-blue-500' : 'text-gray-700'}`}>{day}</div>
                 ))}
               </div>
               <div className="grid grid-cols-7 gap-1">
@@ -445,7 +557,6 @@ export default function ManageShifts() {
                   const dayShifts = getShiftsForDate(dateStr)
                   const isSelected = selectedDate === dateStr
                   const dayOfWeek = new Date(year, month, day).getDay()
-
                   return (
                     <button
                       key={day}
@@ -533,7 +644,6 @@ export default function ManageShifts() {
               </div>
             )}
           </div>
-
         </div>
       </div>
     </div>
