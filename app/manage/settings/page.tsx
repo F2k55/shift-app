@@ -37,7 +37,7 @@ export default function ManageSettings() {
       .from('owners')
       .select('store_id')
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!owner) return
     setStoreId(owner.store_id)
@@ -46,7 +46,7 @@ export default function ManageSettings() {
       .from('stores')
       .select('*')
       .eq('id', owner.store_id)
-      .single()
+      .maybeSingle()
 
     if (store) {
       setStoreName(store.sub_name ? `${store.name} ${store.sub_name}` : store.name)
@@ -127,7 +127,6 @@ export default function ManageSettings() {
       </div>
 
       <div className="p-8 w-full">
-
         <div className="grid grid-cols-3 gap-8 mb-8">
 
           {/* 左カラム */}
