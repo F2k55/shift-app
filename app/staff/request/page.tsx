@@ -46,7 +46,7 @@ function RequestContent() {
       .from('stores')
       .select('open_time, close_time')
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
     if (store) {
       if (store.open_time) setOpenTime(store.open_time.slice(0, 5))
@@ -88,7 +88,6 @@ function RequestContent() {
     const [closeH, closeM] = closeTime.split(':').map(Number)
     let current = openH * 60 + openM
     const end = closeH * 60 + closeM
-
     while (current <= end) {
       const h = Math.floor(current / 60).toString().padStart(2, '0')
       const m = (current % 60).toString().padStart(2, '0')
@@ -197,9 +196,7 @@ function RequestContent() {
             <div className="bg-white rounded-2xl shadow p-4 mb-4">
               <div className="grid grid-cols-7 mb-2">
                 {DAYS.map((day, i) => (
-                  <div key={i} className={`text-center text-xs font-medium py-1 ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-gray-500'}`}>
-                    {day}
-                  </div>
+                  <div key={i} className={`text-center text-xs font-medium py-1 ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-gray-500'}`}>{day}</div>
                 ))}
               </div>
               <div className="grid grid-cols-7 gap-1">
